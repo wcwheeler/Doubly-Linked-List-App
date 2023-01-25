@@ -1,0 +1,105 @@
+class Stop:
+    def __init__(self, stationname, duration=0):
+        self.stationname = stationname
+        self.duration = duration
+        self.next = None
+        self.prev = None
+
+
+class TrainLine:
+    def __init__(self, currentstop=None, destination=None):
+        self.head = None
+        self.tail = None
+        self.currentstop = currentstop
+        self.destination = destination
+
+    def AddStopToHead(self, stationname, duration):
+        stop = Stop(stationname, duration)
+        if self.head is None:
+            self.head = stop
+            self.tail = stop
+            self.currentstop = stop
+        else:
+            self.head.prev = stop
+            stop.next = self.head
+            self.head = stop
+
+    def AddStopNextToCurrent(self, stationname, duration):
+        stop = Stop(stationname, duration)
+        self.currentstop.next.prev = stop
+        stop.next = self.currentstop.next
+        self.currentstop.next = stop
+        stop.prev = self.currentstop
+
+    def AddStopToEnd(self, stationname, duration):
+        stop = Stop(stationname, duration)
+        self.tail.next = stop
+        stop.prev = self.tail
+        self.tail = stop
+
+    def SetDestination(self, destination):
+        ptr = self.head
+        while ptr is not None:
+            if ptr.stationname == destination:
+                print(destination)
+                return
+            ptr = ptr.next
+
+    def CalculateDuration(self):
+        duration = 0
+        ptr = self.currentstop
+        while ptr != self.destination:
+            duration += ptr.duration
+            ptr = ptr.next
+        return duration
+
+    def DisplayAllStops(self):
+        ptr = self.head
+        while ptr is not None:
+            print(str(ptr.stationname) + "->", end="")
+            ptr = ptr.next
+
+
+Line = TrainLine()
+while True:
+    if Line.currentstop is not None:
+        print("The current stop is: " + Line.currentstop.stationname)
+    if Line.destination is not None:
+        print("The destination selcected is:" + Line.destination.stationname)
+    option = input("Welcome to the Whitney's Railroad! Please choose from the following options: 1 to Display "
+                   "Trainline , 2 to Move to next stop, 3 to Move to previous stop, 4 to Add stop after current stop "
+                   ", 5 to Add stop to beginning, 6 to Add stop to the end, 7 to Set Destination , 8 to Calculate "
+                   "total duration to destination ")
+    if option == "1":
+        print(Line.DisplayAllStops())
+    elif option == "2":
+        Line.currentstop = Line.currentstop.next
+    elif option == "3":
+        Line.currentstop = Line.currentstop.prev
+    elif option == "4":
+        if Line.currentstop is None:
+            print("Cannot add stop. Please define your current stop first")
+        val = input("Please input the name of your new stop: ")
+        dur = input("Please input the duration of your new stop: ")
+        Line.AddStopNextToCurrent(val, dur)
+        print(Line.DisplayAllStops())
+    elif option == "5":
+        val = input("Please input the name of your new station: ")
+        dur = input("Please input the duration of your new stop: ")
+        Line.AddStopToHead(val, dur)
+        Line.DisplayAllStops()
+    elif option == "6":
+        val = input("Please input the name of your new station: ")
+        dur = input("Please input the duration of your new stop: ")
+        Line.AddStopToEnd(val, dur)
+        Line.DisplayAllStops()
+    elif option == "7":
+        dest = input("Please input index of your DESTINATION: ")
+        if dest is not True:
+            print("Stop not in Trainline")
+        dest = input('Please choose a Stop indexed within the TrainLine: ')
+        Line.SetDestination(int(dest))
+    elif option == "8":
+        Line.CalculateDuration()
+    else:
+        print("Invalid choice, please try again")
